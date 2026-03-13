@@ -1,0 +1,167 @@
+import org.codehaus.groovy.runtime.GStringImpl
+
+plugins {
+    id 'com.wise.spring-boot-service.project'
+    id 'java'
+    id 'idea'
+    id 'jacoco'
+    id 'maven-publish'
+    id 'com.avast.gradle.docker-compose' version '0.17.20'
+    id 'com.wise.spring-boot-build' version '+'
+    id 'com.wise.gradlewise.gha' version "+"
+    id 'com.wise.gradlewise.cerberus' version "+"
+}
+
+workflow {
+  configService {
+    slackChannel = "#intentpicker-releases"
+    dockerServices = [
+        standardDockerServices.postgres{
+          env = [
+              POSTGRES_DB: "intentpicker",
+              POSTGRES_USER: "test",
+              POSTGRES_PASSWORD: "test"
+          ]
+        },
+        standardDockerServices.kafkaZookeeper(),
+        standardDockerServices.zookeeper(),
+        standardDockerServices.kafka {
+          deprecated_AutoCreateTopics = true
+        },
+    ]
+    buildAndTestJobConfig {
+      container = "ci-images-release.arti.tw.ee/actions_java21"
+      containerSize = "xlarge"
+      env = [
+          RUNS_IN_CI          : "true",
+          ZOOKEEPER_HOST      : "zk-service",
+          KAFKA_HOST          : "kafka",
+      ]
+    }
+  }
+}
+
+group = 'com.wise.intentpicker'
+
+ext {
+    buildVersion = generateVersion() as GStringImpl
+}
+
+wrapper {
+    gradleVersion = '8.5'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(23)
+    }
+}
+
+jar {
+    enabled = false
+}
+
+bootJar {
+    doFirst {
+        manifest {
+            attributes('Implementation-Title': archiveBaseName, 'Implementation-Version': buildVersion, 'Implementation-Timestamp': new Date())
+        }
+    }
+    layered {
+        application {
+            intoLayer("spring-boot-loader") {
+                include "org/springframework/boot/loader/**"
+            }
+            intoLayer("application")
+        }
+        dependencies {
+            intoLayer("layertools") {
+              include "org.springframework.boot:spring-boot-jarmode-tools:*"
+            }
+            intoLayer("dependencies")
+        }
+        layerOrder = ["layertools","dependencies", "spring-boot-loader", "application"]
+    }
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    implementation 'org.springframework.kafka:spring-kafka'
+
+    implementation 'org.flywaydb:flyway-core'
+    implementation 'org.flywaydb:flyway-database-postgresql'
+
+    implementation 'com.zaxxer:HikariCP'
+    implementation 'org.postgresql:postgresql'
+
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-webflux'
+}
+
+tasks.withType(PublishToMavenRepository).configureEach {
+    doLast {
+        println "The service version is: ${project.version}"
+    }
+}
+
+publish.dependsOn assemble
+
+bootRun {
+    systemProperties['spring.profiles.active'] = 'development'
+    jvmArgs = ["-Dspring.output.ansi.enabled=ALWAYS"]
+}
+
+test {
+    systemProperties['spring.profiles.active'] = System.getProperty('spring.profiles.active') ?: 'development'
+    useJUnitPlatform()
+    maxHeapSize = "1g"
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+}
+
+if (System.getenv("RUNS_IN_CI") != "true") {
+    dockerCompose.isRequiredBy(test)
+}
+
+dockerCompose {
+    executable = '/usr/local/bin/docker-compose'
+    dockerExecutable = '/usr/local/bin/docker'
+
+    useComposeFiles = ["docker/docker-compose.yml"]
+
+    stopContainers = false
+    removeContainers = false
+    removeVolumes = false
+
+    environment.put("KAFKA_PORT_MAPPING", "9092")
+    environment.put("POSTGRES_PORT_MAPPING", "5432")
+    environment.put("POSTGRES_HOST", "postgres")
+    environment.put("ZOOKEEPER_PORT_MAPPING", "2181")
+}
+
+static generateVersion() {
+    def commitHash = gitCommit()
+    def branchName = gitBranchName()
+    def snapshotSuffix = branchName == 'master' ? '' : '-SNAPSHOT'
+    "1.${new Date().format('yyMMdd')}.${new Date().format('HHmmss')}-${commitHash}${snapshotSuffix}"
+}
+
+static String gitBranchName() {
+    return 'git rev-parse --abbrev-ref HEAD'.execute().text.trim()
+}
+
+static String gitCommit() {
+    return 'git rev-parse --short HEAD'.execute().text.trim()
+}

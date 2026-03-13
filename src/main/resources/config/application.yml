@@ -1,0 +1,32 @@
+server:
+  port: 12345
+  forward-headers-strategy: none
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: [ 'health', 'liveness' ]
+
+spring:
+  application:
+    name: intentpicker
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: org.postgresql.Driver
+    url: ${ENV_POSTGRES_SERVICEDB_URL}
+    username: ${ENV_POSTGRES_SERVICEDB_USERNAME}
+    password: ${ENV_POSTGRES_SERVICEDB_PASSWORD}
+    hikari:
+      minimum-idle: 1
+  flyway:
+    locations: classpath:db/postgres-migration
+    url: ${spring.datasource.url}
+    user: ${ENV_POSTGRES_SERVICEDB_FLYWAY_USERNAME}
+    password: ${ENV_POSTGRES_SERVICEDB_FLYWAY_PASSWORD}
+    table: "flyway_schema_history"
+  kafka:
+    bootstrap-servers: ${ENV_SECURE_KAFKA_DISCOVERY_BOOTSTRAP_SERVER}
+    consumer:
+      group-id: ${spring.application.name}
+      enable-auto-commit: false

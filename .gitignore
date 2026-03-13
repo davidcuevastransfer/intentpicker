@@ -1,0 +1,29 @@
+# Compiled class file
+*.class
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+
+#idea files
+*.iml
+*.ipr
+*.iws
+/.idea
+*.DS_Store
+
+*.DS_STORE
+
+#vscode files
+.project
+.classpath
+/.settings
+/.vscode
+
+#logs
+/logs
+
+#build folders
+/build
+/out
+/.gradle
+/bin
