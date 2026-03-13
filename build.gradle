@@ -3,10 +3,11 @@ import org.codehaus.groovy.runtime.GStringImpl
 plugins {
     id 'com.wise.spring-boot-service.project'
     id 'java'
+    id 'groovy'
     id 'idea'
     id 'jacoco'
     id 'maven-publish'
-    id 'com.avast.gradle.docker-compose' version '0.17.20'
+    id 'com.avast.gradle.docker-compose' version '0.17.12'
     id 'com.wise.spring-boot-build' version '+'
     id 'com.wise.gradlewise.gha' version "+"
     id 'com.wise.gradlewise.cerberus' version "+"
