@@ -1,4 +1,4 @@
-package com.wise.intentpicker.config;
+package com.wise.consumeronboarding.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;

@@ -1,6 +1,6 @@
-package com.wise.intentpicker.test;
+package com.wise.consumeronboarding.test;
 
-import com.wise.intentpicker.Application;
+import com.wise.consumeronboarding.Application;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;

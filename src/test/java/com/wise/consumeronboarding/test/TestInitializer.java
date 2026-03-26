@@ -1,4 +1,4 @@
-package com.wise.intentpicker.test;
+package com.wise.consumeronboarding.test;
 
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;

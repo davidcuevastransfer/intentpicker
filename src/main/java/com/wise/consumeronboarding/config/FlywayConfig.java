@@ -1,4 +1,4 @@
-package com.wise.intentpicker.config;
+package com.wise.consumeronboarding.config;
 
 import org.springframework.boot.autoconfigure.flyway.FlywayMigrationStrategy;
 import org.springframework.context.annotation.Bean;

@@ -1,4 +1,4 @@
-package com.wise.intentpicker;
+package com.wise.consumeronboarding;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;

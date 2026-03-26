@@ -108,6 +108,13 @@ dependencies {
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-webflux'
+
+    // CO arch
+    implementation 'com.transferwise:domain-authorization-permissions'
+    implementation 'com.transferwise:tw-api-authorization-spring-wise-security-starter'
+    implementation 'com.wise.common.security:wise-security-spring-starter'
+    testImplementation 'com.transferwise:tw-api-authorization-spring-wise-security-test-starter'
+    testImplementation 'com.transferwise:tw-api-authorization-spring-wise-security-test::tests'
 }
 
 tasks.withType(PublishToMavenRepository).configureEach {

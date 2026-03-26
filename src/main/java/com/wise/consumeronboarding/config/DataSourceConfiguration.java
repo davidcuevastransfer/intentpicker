@@ -1,4 +1,4 @@
-package com.wise.intentpicker.config;
+package com.wise.consumeronboarding.config;
 
 import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.boot.autoconfigure.flyway.FlywayDataSource;
