@@ -11,6 +11,8 @@ import com.wise.common.security.core.OrRule;
 import com.wise.common.security.publicapi.PublicApiClientRule;
 import com.wise.common.security.publicapi.ResourceType;
 import com.wise.common.security.spiffe.ServiceRule;
+import com.wise.consumeronboarding.intentpicker.domain.model.IntentPicker;
+import com.wise.consumeronboarding.intentpicker.presentation.mapper.IntentPickerMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,10 +20,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class IntentPickerController {
 
+  IntentPickerService intentPickerService;
+  IntentPickerMapper intentPickerMapper;
+
+  // bff
   @GetMapping("/api/v1/intent-picker")
   @SecurityPolicy(PublicRule.class)
   public IntentPickerResponse getIntentPicker() {
-    return new IntentPickerResponse("id");
+
+    var intentPicker = intentPickerService.get();
+
+    return intentPickerMapper.map(null, intentPicker);
   }
 
   @GetMapping("/internal/v1/intent-picker")
@@ -52,4 +61,6 @@ public class IntentPickerController {
     }
   }
 }
+
+
 
